@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚔️ Epic RPG Battle Arena</title>
+  <style>
+    :root {
+      --bg: #0e0e11;
+      --panel: #24262c;
+      --text: #f5f5f5;
+      --muted: #bdbdbd;
+      --accent: #ffd33d;
+      --hp: #ff4d4f;
+      --xp: #40c4ff;
+      --good: #4caf50;
+      --sel: #8ab4f8;
+      --border: #3a3d44;
+      --easy: #4caf50;
+      --normal: #ff9800;
+      --hard: #f44336;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #0e0e11 0%, #1a1a2e 50%, #16213e 100%);
+      color: var(--text);
+      font-family: Inter, system-ui, Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 960px;
+      margin: 28px auto;
+      padding: 0 16px
+    }
+
+    /* Main Menu Styles */
+    .main-menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    .game-title {
+      font-size: 4rem;
+      font-weight: 900;
+      background: linear-gradient(45deg, #ffd33d, #ff6b6b, #4ecdc4);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 3s ease-in-out infinite;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 30px rgba(255, 211, 61, 0.3);
+    }
+
+    @keyframes gradientShift {
+
+      0%,
+      100% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .game-subtitle {
+      font-size: 1.2rem;
+      color: var(--muted);
+      margin-bottom: 3rem;
+      opacity: 0.8;
+    }
+
+    .difficulty-selection {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .difficulty-card {
+      background: var(--panel);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 200px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .difficulty-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .difficulty-card.easy {
+      border-color: var(--easy);
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), var(--panel));
+    }
+
+    .difficulty-card.normal {
+      border-color: var(--normal);
+      background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), var(--panel));
+    }
+
+    .difficulty-card.hard {
+      border-color: var(--hard);
+      background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), var(--panel));
+    }
+
+    .difficulty-card.selected {
+      transform: translateY(-5px);
+      box-shadow: 0 0 20px rgba(255, 211, 61, 0.4);
+      border-color: var(--accent);
+    }
+
+    .difficulty-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .difficulty-desc {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .difficulty-stats {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    .start-btn {
+      background: linear-gradient(45deg, var(--accent), #ffeb3b);
+      color: #1b1b1b;
+      border: none;
+      border-radius: 15px;
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(255, 211, 61, 0.3);
+      margin-top: 1rem;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 211, 61, 0.4);
+    }
+
+    .start-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Game Screen Styles */
+    .game-screen {
+      display: none;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      text-align: center;
+      letter-spacing: .2px
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+      padding: 18px
+    }
+
+    .row {
+      display: flex;
+      gap: 14px;
+      align-items: stretch
+    }
+
+    .col {
+      flex: 1
+    }
+
+    .name {
+      font-weight: 700;
+      font-size: 18px;
+      margin-bottom: 6px
+    }
+
+    .stat {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 4px 0
+    }
+
+    .bar {
+      height: 12px;
+      background: #14161a;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden
+    }
+
+    .hp {
+      background: var(--hp);
+      height: 100%
+    }
+
+    .xp {
+      background: var(--xp);
+      height: 100%
+    }
+
+    .tag {
+      display: inline-block;
+      background: #14161a;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 6px
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center
+    }
+
+    button {
+      background: var(--accent);
+      color: #1b1b1b;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0, 0, 0, .3);
+      transition: all 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, .3);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      filter: grayscale(.2)
+    }
+
+    .msg {
+      margin-top: 10px;
+      text-align: center;
+      min-height: 26px
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px
+    }
+
+    .enemy {
+      background: #1c1f25;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .enemy:hover {
+      border-color: #6b7280;
+      transform: translateY(-1px)
+    }
+
+    .enemy.dead {
+      opacity: .5;
+      filter: grayscale(.3);
+      pointer-events: none
+    }
+
+    .enemy.selected {
+      outline: 2px solid var(--sel);
+      box-shadow: 0 0 0 2px rgba(138, 180, 248, .25) inset
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .inv {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    .pill {
+      background: #14161a;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px
+    }
+
+    /* RPG Style Animations */
+    @keyframes playerIdle {
+
+      0%,
+      100% {
+        transform: translateY(0px) scale(1);
+        filter: brightness(1);
+      }
+
+      50% {
+        transform: translateY(-2px) scale(1.02);
+        filter: brightness(1.1);
+      }
+    }
+
+    @keyframes enemyIdle {
+
+      0%,
+      100% {
+        transform: translateY(0px) rotate(0deg) scale(1);
+      }
+
+      25% {
+        transform: translateY(-1px) rotate(0.5deg) scale(1.01);
+      }
+
+      75% {
+        transform: translateY(1px) rotate(-0.5deg) scale(0.99);
+      }
+    }
+
+    @keyframes selectedPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        transform: scale(1);
+      }
+
+      50% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes attackFlash {
+      0% {
+        filter: brightness(1);
+      }
+
+      50% {
+        filter: brightness(1.5) saturate(1.3);
+      }
+
+      100% {
+        filter: brightness(1);
+      }
+    }
+
+    .rpg-character {
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .rpg-character::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .rpg-character:hover::before {
+      opacity: 1;
+    }
+
+    .enemy-avatar-2d {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid #8B4513;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      animation: enemyIdle 3s ease-in-out infinite;
+      position: relative;
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2);
+    }
+
+    .enemy-avatar-2d:hover {
+      transform: scale(1.1);
+      box-shadow:
+        0 6px 12px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(255, 77, 79, 0.6);
+    }
+
+    .enemy-avatar-2d.selected {
+      border-color: #FFD700;
+      animation: selectedPulse 1.5s ease-in-out infinite;
+    }
+
+    .enemy-avatar-2d.attacking {
+      animation: attackFlash 0.6s ease-in-out;
+    }
+
+    .enemy-avatar-2d.dead {
+      opacity: 0.4;
+      filter: grayscale(100%) brightness(0.7);
+      animation: none;
+      pointer-events: none;
+      transform: scale(0.9);
+    }
+
+    /* Enemy Type Styles - More Detailed */
+    .enemy-slime {
+      background:
+        radial-gradient(circle at 30% 30%, #90EE90 0%, #32CD32 40%, #228B22 100%);
+      border-color: #006400;
+    }
+
+    .enemy-goblin {
+      background:
+        radial-gradient(circle at 30% 30%, #FF6B6B 0%, #E74C3C 40%, #C0392B 100%);
+      border-color: #8B0000;
+    }
+
+    .enemy-skeleton {
+      background:
+        radial-gradient(circle at 30% 30%, #E8E8E8 0%, #BDC3C7 40%, #95A5A6 100%);
+      border-color: #5D6D7E;
+    }
+
+    .enemy-orc {
+      background:
+        radial-gradient(circle at 30% 30%, #BB8FCE 0%, #9B59B6 40%, #8E44AD 100%);
+      border-color: #6C3483;
+    }
+
+    .enemy-wraith {
+      background:
+        radial-gradient(circle at 30% 30%, #5D6D7E 0%, #34495E 40%, #2C3E50 100%);
+      border-color: #1B2631;
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(52, 73, 94, 0.4);
+    }
+
+    .enemy-dragonling {
+      background:
+        radial-gradient(circle at 30% 30%, #F7DC6F 0%, #F39C12 40%, #E67E22 100%);
+      border-color: #D35400;
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        0 0 15px rgba(243, 156, 18, 0.4);
+    }
+
+    .enemy-boss {
+      width: 56px;
+      height: 56px;
+      font-size: 2.2rem;
+      background:
+        radial-gradient(circle at 30% 30%, #FF4444 0%, #CC0000 40%, #8B0000 100%);
+      border-color: #660000;
+      border-width: 4px;
+      box-shadow:
+        0 6px 12px rgba(0, 0, 0, 0.5),
+        0 0 25px rgba(204, 0, 0, 0.6);
+      animation: selectedPulse 2s ease-in-out infinite;
+    }
+
+    /* Enhanced Battle Effects */
+    .damage-text {
+      position: absolute;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #FF1744;
+      text-shadow:
+        2px 2px 0px #000,
+        -2px -2px 0px #000,
+        2px -2px 0px #000,
+        -2px 2px 0px #000;
+      pointer-events: none;
+      animation: damageFloat 2s ease-out forwards;
+      z-index: 100;
+    }
+
+    .heal-text {
+      position: absolute;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #00E676;
+      text-shadow:
+        2px 2px 0px #000,
+        -2px -2px 0px #000,
+        2px -2px 0px #000,
+        -2px 2px 0px #000;
+      pointer-events: none;
+      animation: healFloat 2s ease-out forwards;
+      z-index: 100;
+    }
+
+    .crit-text {
+      position: absolute;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #FFD700;
+      text-shadow:
+        2px 2px 0px #FF4444,
+        -2px -2px 0px #FF4444,
+        2px -2px 0px #FF4444,
+        -2px 2px 0px #FF4444;
+      pointer-events: none;
+      animation: critFloat 2.5s ease-out forwards;
+      z-index: 100;
+    }
+
+    @keyframes damageFloat {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+
+      20% {
+        transform: translateY(-10px) scale(1.2) rotate(-2deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-40px) scale(0.8) rotate(5deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes healFloat {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+
+      20% {
+        transform: translateY(-8px) scale(1.1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-35px) scale(0.9);
+        opacity: 0;
+      }
+    }
+
+    @keyframes critFloat {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+
+      10% {
+        transform: translateY(-5px) scale(1.3) rotate(-3deg);
+        opacity: 1;
+      }
+
+      30% {
+        transform: translateY(-15px) scale(1.4) rotate(2deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-50px) scale(1) rotate(-5deg);
+        opacity: 0;
+      }
+    }
+
+    /* Battle Arena Enhancements */
+    .rpg-battle-arena::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px, 30px 30px, 70px 70px;
+      pointer-events: none;
+      animation: sparkle 4s ease-in-out infinite;
+    }
+
+    @keyframes sparkle {
+
+      0%,
+      100% {
+        opacity: 0.3;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    .auto-toggle {
+      background: var(--good);
+      margin-bottom: 10px;
+    }
+
+    .auto-toggle.active {
+      background: var(--hp);
+    }
+
+    .back-btn {
+      background: #6c757d;
+      color: white;
+      margin-right: auto;
+    }
+
+    @media (max-width: 768px) {
+      .game-title {
+        font-size: 2.5rem;
+      }
+
+      .difficulty-selection {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .difficulty-card {
+        min-width: 280px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Main Menu Screen -->
+  <div id="mainMenu" class="main-menu">
+    <h1 class="game-title">⚔️ Epic RPG Battle</h1>
+    <p class="game-subtitle">Choose your difficulty and embark on an epic 10-wave adventure!</p>
+
+    <div class="difficulty-selection">
+      <div class="difficulty-card easy" data-difficulty="easy">
+        <div class="difficulty-title">🌱 Easy Mode</div>
+        <div class="difficulty-desc">Perfect for beginners</div>
+        <div class="difficulty-stats">
+          • Enemies deal 50% less damage<br>
+          • +50% player health<br>
+          • More potions & bombs
+        </div>
+      </div>
+
+      <div class="difficulty-card normal" data-difficulty="normal">
+        <div class="difficulty-title">⚖️ Normal Mode</div>
+        <div class="difficulty-desc">Balanced challenge</div>
+        <div class="difficulty-stats">
+          • Standard difficulty<br>
+          • Balanced progression<br>
+          • Fair rewards
+        </div>
+      </div>
+
+      <div class="difficulty-card hard" data-difficulty="hard">
+        <div class="difficulty-title">🔥 Hard Mode</div>
+        <div class="difficulty-desc">For experienced warriors</div>
+        <div class="difficulty-stats">
+          • Enemies deal +50% damage<br>
+          • Faster enemy scaling<br>
+          • Epic rewards
+        </div>
+      </div>
+    </div>
+
+    <button id="startGame" class="start-btn" disabled>Start Adventure</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="gameScreen" class="game-screen">
+    <div class="wrap">
+      <h1>⚔️ Epic RPG Battle Arena</h1>
+
+      <div class="card">
+        <!-- Game Controls -->
+        <div class="actions" style="margin-bottom: 15px;">
+          <button id="btnBack" class="back-btn">← Back to Menu</button>
+          <div style="flex: 1;"></div>
+          <span id="difficultyDisplay" class="pill" style="padding: 8px 15px; font-weight: bold;"></span>
+        </div>
+
+        <!-- Top row: Player panel + Inventory -->
+        <div class="row">
+          <div class="col">
+            <div class="name">Player <span id="lvlTag" class="tag"></span></div>
+            <div class="stat" id="pStats"></div>
+            <div class="bar">
+              <div id="pHP" class="hp" style="width:100%"></div>
+            </div>
+            <div class="stat" style="margin-top:6px">XP</div>
+            <div class="bar">
+              <div id="pXP" class="xp" style="width:0%"></div>
+            </div>
+            <div class="inv" style="margin-top:10px">
+              <span class="pill">🧪 Potions: <b id="pots">3</b></span>
+              <span class="pill">💣 Bombs: <b id="bombs">2</b></span>
+              <span class="pill">Wave: <b id="waveNo">1</b></span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="name">Battle Arena <span id="waveLabel" class="tag"></span></div>
+
+            <!-- RPG Style Battle Arena -->
+            <div class="rpg-battle-arena" style="
+              background: 
+                radial-gradient(circle at 20% 30%, rgba(34, 139, 34, 0.8) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(34, 139, 34, 0.6) 0%, transparent 50%),
+                linear-gradient(45deg, #228B22 0%, #32CD32 50%, #90EE90 100%);
+              border-radius: 15px;
+              padding: 0;
+              position: relative;
+              min-height: 300px;
+              border: 4px solid #8B4513;
+              box-shadow: 
+                inset 0 0 20px rgba(0,0,0,0.3),
+                0 8px 16px rgba(0,0,0,0.4);
+              overflow: hidden;
+              margin-bottom: 15px;
+            ">
+              <!-- Grass Pattern Background -->
+              <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-image: 
+                  radial-gradient(circle at 25% 25%, rgba(0,100,0,0.3) 2px, transparent 2px),
+                  radial-gradient(circle at 75% 75%, rgba(0,128,0,0.2) 1px, transparent 1px);
+                background-size: 20px 20px, 15px 15px;
+                opacity: 0.6;
+              "></div>
+
+              <!-- Stone Path -->
+              <div style="
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                background: 
+                  linear-gradient(90deg, 
+                    rgba(139, 69, 19, 0.8) 0%, 
+                    rgba(160, 82, 45, 0.9) 50%, 
+                    rgba(139, 69, 19, 0.8) 100%);
+                border-top: 2px solid #654321;
+              "></div>
+
+              <!-- Decorative Elements -->
+              <div style="position: absolute; top: 10px; left: 10px; font-size: 1.2rem;">🌳</div>
+              <div style="position: absolute; top: 15px; right: 15px; font-size: 1rem;">🌸</div>
+              <div style="position: absolute; bottom: 80px; left: 50%; font-size: 0.8rem;">🌿</div>
+              <div style="position: absolute; top: 50%; right: 10px; font-size: 0.9rem;">🍄</div>
+
+              <!-- Player Character -->
+              <div id="playerAvatar2D" class="rpg-character player-char" style="
+                position: absolute;
+                bottom: 15px;
+                left: 30px;
+                width: 48px;
+                height: 48px;
+                background: 
+                  radial-gradient(circle at 30% 30%, #87CEEB 0%, #4682B4 70%),
+                  linear-gradient(135deg, #4169E1 0%, #1E90FF 100%);
+                border-radius: 50%;
+                border: 3px solid #FFD700;
+                box-shadow: 
+                  0 0 15px rgba(255, 215, 0, 0.6),
+                  inset 0 2px 4px rgba(255,255,255,0.3);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.8rem;
+                animation: playerIdle 2.5s ease-in-out infinite;
+                cursor: pointer;
+                z-index: 10;
+              ">⚔️</div>
+
+              <!-- Enemy Formation Area -->
+              <div id="enemyContainer2D" style="
+                position: absolute;
+                top: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                max-width: 250px;
+                z-index: 5;
+              "></div>
+
+              <!-- Battle Effects Container -->
+              <div id="battleEffects" style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                pointer-events: none;
+                z-index: 20;
+              "></div>
+            </div>
+
+            <!-- Traditional Enemy List -->
+            <div id="enemies" class="grid"></div>
+            <div class="small" style="margin-top:6px">
+              <span id="combatTip">Enemies attack automatically every 2 seconds! Use your skills wisely!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="actions">
+          <button id="btnAttack">⚔️ Attack</button>
+          <button id="btnDefend">🛡️ Defend</button>
+          <button id="btnHeal">🧪 Use Potion</button>
+          <button id="btnBomb">💣 Use Bomb</button>
+          <button id="btnNext">➡️ Next Wave</button>
+          <button id="btnRestart" style="background: #ff4d4f; color: white;">🔄 Restart</button>
+        </div>
+
+        <!-- Death Options (hidden by default) -->
+        <div id="deathOptions" class="actions"
+          style="display: none; margin-top: 15px; background: rgba(255, 77, 79, 0.1); padding: 15px; border-radius: 10px;">
+          <button id="btnContinue" style="background: #4caf50; color: white;">🔄 Continue This Wave</button>
+          <button id="btnRestartFromBeginning" style="background: #ff4d4f; color: white;">🏠 Restart From
+            Beginning</button>
+        </div>
+
+        <div id="msg" class="msg">Welcome! Choose your combat mode and prepare for battle!</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== Game State ======
+    let selectedDifficulty = null;
+    let autoMode = false;
+    let autoInterval = null;
+    let difficultyMultipliers = {
+      easy: { enemyDamage: 0.6, playerHP: 1.4, supplies: 1.5 },        // Easier but not too easy
+      normal: { enemyDamage: 1.0, playerHP: 1.0, supplies: 1.0 },      // Balanced
+      hard: { enemyDamage: 1.4, playerHP: 0.8, supplies: 0.8 }         // Harder but fair
+    };
+
+    // ====== Core Player State ======
+    const player = {
+      level: 1, xp: 0, xpToNext: 60,
+      maxHP: 200, hp: 200,  // Start with lower HP, grows with level
+      atk: 60, def: 8,  // Balanced starting stats
+      pots: 3, bombs: 2
+    };
+
+    // ====== Enemy Templates ======
+    const enemyPool = [
+      { name: "Slime", baseHP: 0, baseATK: 50, tier: "Common" },
+      { name: "Goblin", baseHP: 0, baseATK: 60, tier: "Common" },
+      { name: "Skeleton", baseHP: 0, baseATK: 70, tier: "Uncommon" },
+      { name: "Orc", baseHP: 0, baseATK: 80, tier: "Uncommon" },
+      { name: "Wraith", baseHP: 0, baseATK: 90, tier: "Rare" },
+      { name: "Dragonling", baseHP: 0, baseATK: 100, tier: "Epic" }
+    ];
+
+    // ====== Boss Template ======
+    const bossTemplate = {
+      name: "🐉 Ancient Dragon Lord",
+      baseHP: 1700,
+      baseATK: 200,  // Boss attack scales with level
+      tier: "BOSS",
+      special: true
+    };
+
+    // ====== Runtime State ======
+    let enemies = [];        // current wave
+    let selected = 0;        // selected enemy index
+    let locked = false;      // animation/turn lock
+    let wave = 1;
+    let enemyAttackInterval = null; // For automatic enemy attacks
+
+    // ====== Automatic Enemy Attack System ======
+    function startEnemyAttacks() {
+      // Stop any existing enemy attack interval
+      if (enemyAttackInterval) {
+        clearInterval(enemyAttackInterval);
+      }
+
+      console.log("Starting enemy attacks"); // Debug log
+
+      // Start automatic enemy attacks every 2 seconds (faster)
+      enemyAttackInterval = setInterval(() => {
+        if (living().length > 0 && player.hp > 0 && !locked) {
+          console.log("Enemy auto-attack triggered"); // Debug log
+          enemyTurn(); // Enemies attack automatically
+        } else if (living().length === 0) {
+          // Stop enemy attacks when wave is cleared
+          stopEnemyAttacks();
+        }
+      }, 2000); // Faster attacks every 2 seconds
+    }
+
+    function stopEnemyAttacks() {
+      if (enemyAttackInterval) {
+        clearInterval(enemyAttackInterval);
+        enemyAttackInterval = null;
+        console.log("Enemy attacks stopped"); // Debug log
+      }
+    }
+
+    // ====== Main Menu Logic ======
+    function initMainMenu() {
+      const difficultyCards = document.querySelectorAll('.difficulty-card');
+      const startBtn = document.getElementById('startGame');
+
+      difficultyCards.forEach(card => {
+        card.addEventListener('click', () => {
+          difficultyCards.forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedDifficulty = card.dataset.difficulty;
+          startBtn.disabled = false;
+        });
+      });
+
+      startBtn.addEventListener('click', () => {
+        if (selectedDifficulty) {
+          startGame();
+        }
+      });
+    }
+
+    function startGame() {
+      document.getElementById('mainMenu').style.display = 'none';
+      document.getElementById('gameScreen').style.display = 'block';
+
+      // Apply difficulty settings
+      const mult = difficultyMultipliers[selectedDifficulty];
+      player.maxHP = Math.round(200 * mult.playerHP);  // Start with 200 base HP
+      player.hp = player.maxHP;
+      player.pots = Math.round(3 * mult.supplies);
+      player.bombs = Math.round(2 * mult.supplies);
+
+      // Update difficulty display
+      const diffNames = { easy: '🌱 Easy', normal: '⚖️ Normal', hard: '🔥 Hard' };
+      document.getElementById('difficultyDisplay').textContent = diffNames[selectedDifficulty];
+
+      boot();
+    }
+
+    function backToMenu() {
+      document.getElementById('gameScreen').style.display = 'none';
+      document.getElementById('mainMenu').style.display = 'flex';
+
+      // Stop auto mode
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+      }
+
+      // Stop enemy attacks
+      stopEnemyAttacks();
+
+      autoMode = false;
+
+      // Reset game state
+      restartGame();
+    }
+
+    // ====== Helpers ======
+    const $ = id => document.getElementById(id);
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+    const living = () => enemies.filter(e => e.hp > 0);
+
+    function setMsg(t) { $("msg").innerText = t; }
+    function pct(cur, max) { return `${clamp(Math.round((cur / max) * 100), 0, 100)}%`; }
+
+    // ====== 2D Animation System ======
+    function showDamageText(x, y, damage, isHeal = false, isCrit = false) {
+      const text = document.createElement('div');
+
+      if (isCrit) {
+        text.className = 'crit-text';
+        text.textContent = `CRIT! ${damage}`;
+      } else {
+        text.className = isHeal ? 'heal-text' : 'damage-text';
+        text.textContent = isHeal ? `+${damage}` : `${damage}`;
+      }
+
+      text.style.left = x + 'px';
+      text.style.top = y + 'px';
+
+      const effects = document.getElementById('battleEffects');
+      if (effects) {
+        effects.appendChild(text);
+        setTimeout(() => {
+          if (text.parentNode) {
+            text.parentNode.removeChild(text);
+          }
+        }, isCrit ? 2500 : 2000);
+      }
+    }
+
+    function addBattleEffect(type, x, y) {
+      const effect = document.createElement('div');
+      effect.style.position = 'absolute';
+      effect.style.left = x + 'px';
+      effect.style.top = y + 'px';
+      effect.style.pointerEvents = 'none';
+      effect.style.zIndex = '15';
+
+      switch (type) {
+        case 'hit':
+          effect.innerHTML = '💥';
+          effect.style.fontSize = '1.5rem';
+          effect.style.animation = 'damageFloat 1s ease-out forwards';
+          break;
+        case 'heal':
+          effect.innerHTML = '✨';
+          effect.style.fontSize = '1.2rem';
+          effect.style.animation = 'healFloat 1.5s ease-out forwards';
+          break;
+        case 'crit':
+          effect.innerHTML = '⚡';
+          effect.style.fontSize = '2rem';
+          effect.style.animation = 'critFloat 1.5s ease-out forwards';
+          break;
+      }
+
+      const effects = document.getElementById('battleEffects');
+      if (effects) {
+        effects.appendChild(effect);
+        setTimeout(() => {
+          if (effect.parentNode) {
+            effect.parentNode.removeChild(effect);
+          }
+        }, 1500);
+      }
+    }
+
+    function getEnemyClass(name) {
+      const classMap = {
+        'Slime': 'enemy-slime',
+        'Goblin': 'enemy-goblin',
+        'Skeleton': 'enemy-skeleton',
+        'Orc': 'enemy-orc',
+        'Wraith': 'enemy-wraith',
+        'Dragonling': 'enemy-dragonling',
+        '🐉 Ancient Dragon Lord': 'enemy-boss'
+      };
+      return classMap[name] || 'enemy-goblin';
+    }
+
+    function getEnemyEmoji(name) {
+      const emojiMap = {
+        'Slime': '🟢',
+        'Goblin': '👹',
+        'Skeleton': '💀',
+        'Orc': '👺',
+        'Wraith': '👻',
+        'Dragonling': '🐲',
+        '🐉 Ancient Dragon Lord': '🐉'
+      };
+      return emojiMap[name] || '👹';
+    }
+
+    // ====== UI ======
+    function renderEnemies() {
+      // Render 2D avatars
+      const container2D = $("enemyContainer2D");
+      if (container2D) {
+        container2D.innerHTML = "";
+
+        enemies.forEach((e, i) => {
+          const avatar = document.createElement("div");
+          avatar.className = `enemy-avatar-2d ${getEnemyClass(e.name)}`;
+          avatar.textContent = getEnemyEmoji(e.name);
+
+          if (e.hp <= 0) {
+            avatar.classList.add('dead');
+          }
+
+          if (i === selected && e.hp > 0) {
+            avatar.classList.add('selected');
+          }
+
+          if (e.hp > 0) {
+            avatar.addEventListener("click", () => {
+              selected = i;
+              renderEnemies();
+            });
+          }
+
+          container2D.appendChild(avatar);
+        });
+      }
+
+      // Render traditional enemy list
+      const root = $("enemies");
+      if (root) {
+        root.innerHTML = "";
+        enemies.forEach((e, i) => {
+          const card = document.createElement("div");
+          card.className = "enemy" + (e.hp <= 0 ? " dead" : "") + (i === selected && e.hp > 0 ? " selected" : "");
+          card.innerHTML = `
+            <div class="name">${e.name} <span class="tag">${e.tier}</span></div>
+            <div class="stat">HP: ${e.hp}/${e.maxHP} | ATK: ${e.atk}</div>
+            <div class="bar"><div class="hp" style="width:${pct(e.hp, e.maxHP)}"></div></div>
+          `;
+          if (e.hp > 0) {
+            card.addEventListener("click", () => {
+              selected = i;
+              renderEnemies();
+            });
+          }
+          root.appendChild(card);
+        });
+      }
+    }
+
+    function updateUI() {
+      $("pStats").innerText = `HP: ${player.hp}/${player.maxHP}  |  ATK: ${player.atk}  |  DEF: ${player.def}`;
+      $("lvlTag").innerText = `Lv. ${player.level}`;
+      $("pHP").style.width = pct(player.hp, player.maxHP);
+      $("pXP").style.width = pct(player.xp, player.xpToNext);
+      $("pots").innerText = player.pots;
+      $("bombs").innerText = player.bombs;
+      $("waveNo").innerText = wave;
+      $("waveLabel").innerText = wave === 10 ? "BOSS" : `#${wave}/10`;
+      renderEnemies();
+
+      // button enables (disabled in auto mode except for specific buttons)
+      const manualDisabled = autoMode || locked || player.hp <= 0;
+      $("btnAttack").disabled = manualDisabled || living().length === 0;
+      $("btnDefend").disabled = manualDisabled || living().length === 0;
+      $("btnHeal").disabled = manualDisabled || player.pots <= 0;
+      $("btnBomb").disabled = manualDisabled || player.bombs <= 0 || living().length === 0;
+      $("btnNext").disabled = (autoMode || locked || living().length > 0);
+      $("btnRestart").disabled = locked && $("deathOptions").style.display === "none"; // Only disable if not showing death options
+    }
+
+    // ====== Level & Rewards ======
+    function levelUp() {
+      player.level++;
+      player.xp = 0;
+      player.xpToNext = Math.round(player.xpToNext * 1.35);
+
+      // HP grows significantly with level, capped at 1500
+      const hpIncrease = Math.round(player.maxHP * 0.20); // 20% increase per level
+      player.maxHP = Math.min(player.maxHP + hpIncrease, 1500); // Cap at 1500
+      player.hp = player.maxHP;
+
+      player.atk = Math.round(player.atk * 1.20); // 20% attack growth per level
+      player.def = Math.round(player.def * 1.15); // 15% defense growth per level
+      setMsg(`🎉 Level Up! You reached Level ${player.level}. HP increased to ${player.maxHP}!`);
+
+      // Ensure UI updates after level up
+      setTimeout(() => {
+        updateUI();
+      }, 100);
+    }
+
+    function grantWaveRewards() {
+      const enemiesDefeated = enemies.length;
+      let baseXP = 25 + Math.round(player.level * 3) + wave * 5;
+
+      // Boss wave gives massive XP
+      if (wave === 10) baseXP *= 3;
+
+      const totalXP = baseXP * enemiesDefeated;
+      player.xp += totalXP;
+
+      // Guaranteed loot for higher waves
+      let gotPotion = false;
+      let gotBomb = false;
+
+      if (wave >= 3) { player.pots++; gotPotion = true; }
+      if (wave >= 5) { player.bombs++; gotBomb = true; }
+      if (wave >= 7) { player.pots++; player.bombs++; gotPotion = true; gotBomb = true; }
+      if (wave === 10) {
+        player.pots += 3;
+        player.bombs += 3;
+        gotPotion = true;
+        gotBomb = true;
+      }
+
+      let lootMsg = "";
+      if (gotPotion) lootMsg += " + potions";
+      if (gotBomb) lootMsg += " + bombs";
+
+      if (wave === 10) {
+        setMsg(`🏆 BOSS DEFEATED! Gained ${totalXP} XP + massive rewards!`);
+      } else {
+        setMsg(`💎 Wave ${wave}/10 cleared! Gained ${totalXP} XP${lootMsg}`);
+      }
+
+      // Check for level up and ensure proper state management
+      if (player.xp >= player.xpToNext) {
+        setTimeout(() => {
+          levelUp();
+        }, 500);
+      }
+    }
+
+    // ====== Wave Spawning ======
+    function spawnWave() {
+      enemies = [];
+
+      // BOSS WAVE 10
+      if (wave === 10) {
+        // Boss HP is capped at 1700 or 10% more than player HP, whichever is higher
+        const bossHP = Math.max(Math.round(player.maxHP * 1.10), 1700);
+        const bossAttackScale = 1 + (player.level - 1) * 0.15;
+        enemies.push({
+          name: bossTemplate.name,
+          tier: bossTemplate.tier,
+          maxHP: bossHP,
+          hp: bossHP,
+          atk: Math.round(bossTemplate.baseATK * bossAttackScale),
+          special: true
+        });
+        selected = 0;
+        setMsg(`🔥 FINAL BOSS WAVE! The Ancient Dragon Lord emerges!`);
+        updateUI();
+
+        // Start automatic enemy attacks for boss
+        startEnemyAttacks();
+        return;
+      }
+
+      // Regular waves 1-9
+      let count, availableEnemies;
+
+      if (wave <= 2) {
+        count = 2;
+        availableEnemies = enemyPool.slice(0, 2); // Slimes and Goblins
+      } else if (wave <= 4) {
+        count = 3;
+        availableEnemies = enemyPool.slice(1, 4); // Goblins to Orcs
+      } else if (wave <= 6) {
+        count = 3;
+        availableEnemies = enemyPool.slice(2, 5); // Skeletons to Wraiths
+      } else if (wave <= 8) {
+        count = 4;
+        availableEnemies = enemyPool.slice(3, 6); // Orcs to Dragonlings
+      } else { // Wave 9
+        count = 4;
+        availableEnemies = enemyPool.slice(4, 6); // Only strongest enemies
+      }
+
+      for (let i = 0; i < count; i++) {
+        const base = availableEnemies[rand(0, availableEnemies.length - 1)];
+        // Enemy HP is always 5% more than current player HP
+        const enemyBaseHP = Math.round(player.maxHP * 1.05); // 5% more HP than player
+
+        // Enemy attack scales with level and wave
+        const waveScale = 1 + (wave - 1) * 0.12; // 12% increase per wave
+        const levelScale = 1 + (player.level - 1) * 0.10; // 10% increase per player level
+        const difficultyScale = selectedDifficulty === 'hard' ? 1.2 : selectedDifficulty === 'easy' ? 0.8 : 1.0;
+
+        // Enemy HP is always 5% more than player
+        const maxHP = enemyBaseHP;
+
+        // Enemy attack scales with level/wave
+        const attackScale = waveScale * levelScale * difficultyScale;
+
+        enemies.push({
+          name: base.name,
+          tier: base.tier,
+          maxHP,
+          hp: maxHP,
+          atk: Math.round(base.baseATK * attackScale)
+        });
+      }
+      selected = 0;
+      setMsg(`⚔️ Wave ${wave}/10 begins! ${enemies.length} enemies appear.`);
+      updateUI();
+
+      // Start automatic enemy attacks
+      startEnemyAttacks();
+    }
+
+    function nextWave() {
+      // Check if game is complete
+      if (wave >= 10) {
+        setMsg(`🎉 VICTORY! You defeated the Ancient Dragon Lord! You are the ultimate champion!`);
+        setTimeout(() => {
+          if (confirm("🏆 Congratulations! You completed all 10 waves! Start a new game?")) {
+            restartGame();
+          }
+        }, 2000);
+        return;
+      }
+
+      wave++;
+
+      // Player gets stronger EVERY wave
+      const hpIncrease = Math.round(player.maxHP * 0.15); // 15% HP increase each wave
+      const atkIncrease = Math.round(player.atk * 0.12); // 12% attack increase each wave
+      const defIncrease = Math.round(player.def * 0.08); // 8% defense increase each wave
+
+      player.maxHP += hpIncrease;
+      player.hp = player.maxHP; // Full heal each wave
+      player.atk += atkIncrease;
+      player.def += defIncrease;
+
+      // Give extra supplies for harder waves
+      if (wave >= 5) player.pots += 1;
+      if (wave >= 7) player.bombs += 1;
+      if (wave === 10) {
+        player.pots += 2;
+        player.bombs += 2;
+      }
+
+      setMsg(`💪 Wave ${wave}/10! You grow stronger! HP+${hpIncrease}, ATK+${atkIncrease}, DEF+${defIncrease}`);
+
+      setTimeout(() => {
+        spawnWave();
+      }, 1500);
+    }
+
+    // ====== Combat ======
+    function ensureTarget() {
+      if (living().length === 0) return -1;
+      if (selected < 0 || selected >= enemies.length || enemies[selected].hp <= 0) {
+        selected = enemies.findIndex(e => e.hp > 0);
+      }
+      return selected;
+    }
+
+    function playerAttack() {
+      if (locked || player.hp <= 0) return;
+      const idx = ensureTarget();
+      if (idx === -1) return; // no enemies
+
+      locked = true;
+      const target = enemies[idx];
+      updateUI();
+
+      // miss / crit
+      if (Math.random() < 0.10) {
+        setMsg("😵 Your attack missed!");
+        updateUI();
+        setTimeout(() => enemyTurn(), 350);
+        return;
+      }
+      const crit = Math.random() < 0.20;
+      let dmg = player.atk + rand(-2, 3);
+      if (crit) dmg = Math.round(dmg * 1.8);
+
+      target.hp = clamp(target.hp - dmg, 0, target.maxHP);
+
+      // Show enhanced damage animation
+      const container2D = $("enemyContainer2D");
+      if (container2D) {
+        const avatars = container2D.children;
+        if (avatars[idx]) {
+          const rect = avatars[idx].getBoundingClientRect();
+          const arenaRect = document.querySelector('.rpg-battle-arena').getBoundingClientRect();
+
+          // Add battle effect
+          addBattleEffect(crit ? 'crit' : 'hit',
+            rect.left - arenaRect.left + 22,
+            rect.top - arenaRect.top + 10
+          );
+
+          // Show damage text
+          showDamageText(
+            rect.left - arenaRect.left + 22,
+            rect.top - arenaRect.top + 10,
+            dmg,
+            false,
+            crit
+          );
+
+          // Add attack animation to enemy
+          avatars[idx].classList.add('attacking');
+          setTimeout(() => {
+            avatars[idx].classList.remove('attacking');
+          }, 600);
+        }
+      }
+
+      setMsg(crit ? `💥 Critical hit! You dealt ${dmg} to ${target.name}.` : `You dealt ${dmg} to ${target.name}.`);
+      updateUI();
+
+      // check if wave cleared
+      if (living().length === 0) {
+        stopEnemyAttacks(); // Stop automatic enemy attacks
+        setTimeout(() => {
+          grantWaveRewards();
+          locked = false;
+          updateUI();
+        }, 800);
+        return;
+      }
+
+      // Don't manually trigger enemy turn - they attack automatically now
+    }
+
+    function enemyTurn(defending = false) {
+      const foes = living();
+      if (foes.length === 0) {
+        locked = false;
+        updateUI();
+        return;
+      }
+
+      // all living enemies attack with slightly reduced damage each
+      let total = 0;
+      foes.forEach(e => {
+        const base = e.atk + rand(-2, 2);
+        total += clamp(Math.round(base), 0, 999);
+      });
+
+      // Apply difficulty damage multiplier
+      const diffMult = difficultyMultipliers[selectedDifficulty].enemyDamage;
+      total = Math.round(total * diffMult);
+
+      // mitigation
+      if (defending) total = Math.max(0, Math.round(total - player.def * 2.2));
+      else total = Math.max(0, Math.round(total - player.def));
+
+      player.hp = clamp(player.hp - total, 0, player.maxHP);
+
+      // Show enhanced damage on player
+      const playerAvatar = $("playerAvatar2D");
+      if (playerAvatar && total > 0) {
+        const rect = playerAvatar.getBoundingClientRect();
+        const arena = document.querySelector('.rpg-battle-arena');
+        if (arena) {
+          const arenaRect = arena.getBoundingClientRect();
+
+          // Add hit effect
+          addBattleEffect('hit',
+            rect.left - arenaRect.left + 24,
+            rect.top - arenaRect.top + 10
+          );
+
+          // Show damage text
+          showDamageText(
+            rect.left - arenaRect.left + 24,
+            rect.top - arenaRect.top + 10,
+            total
+          );
+
+          // Add damage animation to player
+          playerAvatar.classList.add('attacking');
+          setTimeout(() => {
+            playerAvatar.classList.remove('attacking');
+          }, 600);
+        }
+      }
+
+      setMsg(total === 0 ? "🛡️ You blocked the barrage!" : `👹 Enemies hit you for ${total} total damage.`);
+      updateUI();
+
+      // Always unlock after a short delay to ensure UI updates
+      setTimeout(() => {
+        if (player.hp <= 0) {
+          setMsg("💀 You were defeated! Choose your option:");
+
+          // Stop auto combat when player dies
+          if (autoMode) {
+            stopAutoCombat();
+            autoMode = false;
+          }
+          stopEnemyAttacks();
+
+          // Show death options
+          showDeathOptions();
+        } else {
+          locked = false;
+          updateUI();
+        }
+      }, 100);
+    }
+
+    function defend() {
+      if (locked || living().length === 0 || player.hp <= 0) return;
+      locked = true;
+      setMsg("🛡️ You brace for impact!");
+      updateUI();
+      // Enemies will attack automatically, defend just reduces next damage
+      locked = false;
+    }
+
+    function usePotion() {
+      if (locked || player.pots <= 0 || player.hp <= 0) return;
+      locked = true;
+      const heal = Math.round(player.maxHP * 0.38);
+      player.pots--;
+      player.hp = clamp(player.hp + heal, 0, player.maxHP);
+
+      // Show enhanced heal effect on player
+      const playerAvatar = $("playerAvatar2D");
+      if (playerAvatar) {
+        const rect = playerAvatar.getBoundingClientRect();
+        const arena = document.querySelector('.rpg-battle-arena');
+        if (arena) {
+          const arenaRect = arena.getBoundingClientRect();
+
+          // Add heal effect
+          addBattleEffect('heal',
+            rect.left - arenaRect.left + 24,
+            rect.top - arenaRect.top + 10
+          );
+
+          // Show heal text
+          showDamageText(
+            rect.left - arenaRect.left + 24,
+            rect.top - arenaRect.top + 10,
+            heal,
+            true
+          );
+        }
+      }
+
+      setMsg(`✨ You used a potion and restored ${heal} HP.`);
+      updateUI();
+
+      // Enemies attack automatically, just unlock
+      locked = false;
+    }
+
+    function useBomb() {
+      if (locked || player.bombs <= 0 || living().length === 0) return;
+      locked = true;
+      player.bombs--;
+      const foes = living();
+      const base = Math.round(player.atk * 0.8) + rand(2, 5);
+      foes.forEach(e => {
+        const dmg = base + rand(-2, 3);
+        e.hp = clamp(e.hp - dmg, 0, e.maxHP);
+      });
+      setMsg(`💣 Bomb exploded! Damaged ${foes.length} enemies.`);
+      updateUI();
+
+      if (living().length === 0) {
+        stopEnemyAttacks(); // Stop automatic enemy attacks
+        setTimeout(() => {
+          grantWaveRewards();
+          locked = false;
+          updateUI();
+        }, 800);
+      }
+      // Enemies attack automatically now, no need to manually trigger
+    }
+
+    // ====== Auto Combat System (Player Only) ======
+    function toggleAutoMode() {
+      autoMode = !autoMode;
+      const btn = $("btnAutoToggle");
+
+      if (autoMode) {
+        btn.textContent = "🛑 Disable Auto Combat";
+        btn.classList.add("active");
+        $("combatTip").textContent = "Auto Mode: AI is fighting for you! Enemies attack automatically!";
+        startAutoCombat();
+      } else {
+        btn.textContent = "🤖 Enable Auto Combat";
+        btn.classList.remove("active");
+        $("combatTip").textContent = "Manual Mode: Click buttons to fight. Enemies attack automatically!";
+        stopAutoCombat();
+      }
+    }
+
+    function startAutoCombat() {
+      if (autoInterval) clearInterval(autoInterval);
+
+      autoInterval = setInterval(() => {
+        if (locked || player.hp <= 0) return;
+
+        // Auto next wave
+        if (living().length === 0) {
+          setTimeout(() => {
+            if (!locked && living().length === 0) {
+              locked = true;
+              updateUI();
+              setTimeout(() => {
+                nextWave();
+                locked = false;
+                updateUI();
+              }, 200);
+            }
+          }, 1000);
+          return;
+        }
+
+        // Smart AI decisions
+        const healthPercent = player.hp / player.maxHP;
+        const enemyCount = living().length;
+
+        // Use potion if health is low
+        if (healthPercent < 0.3 && player.pots > 0) {
+          usePotion();
+        }
+        // Use bomb if many enemies and have bombs
+        else if (enemyCount >= 3 && player.bombs > 0) {
+          useBomb();
+        }
+        // Defend if health is medium-low and many enemies
+        else if (healthPercent < 0.5 && enemyCount >= 2) {
+          defend();
+        }
+        // Otherwise attack
+        else {
+          playerAttack();
+        }
+      }, 1500); // Auto action every 1.5 seconds
+    }
+
+    function stopAutoCombat() {
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+      }
+    }
+
+    // ====== Controls ======
+    $("btnAttack").addEventListener("click", () => { if (!autoMode) playerAttack(); });
+    $("btnDefend").addEventListener("click", () => { if (!autoMode) defend(); });
+    $("btnHeal").addEventListener("click", () => { if (!autoMode) usePotion(); });
+    $("btnBomb").addEventListener("click", () => { if (!autoMode) useBomb(); });
+    $("btnNext").addEventListener("click", () => {
+      if (autoMode) return; // Auto mode handles this
+      console.log("Next Wave clicked", { locked, livingCount: living().length });
+      if (!locked && living().length === 0) {
+        locked = true;
+        updateUI();
+        setTimeout(() => {
+          nextWave();
+          locked = false;
+          updateUI();
+        }, 200);
+      }
+    });
+
+    $("btnBack").addEventListener("click", backToMenu);
+
+    // ====== Death Options System ======
+    // Show death options
+    function showDeathOptions() {
+      $("deathOptions").style.display = "flex";
+      locked = true; // Keep game locked until player chooses
+    }
+
+    // Hide death options
+    function hideDeathOptions() {
+      $("deathOptions").style.display = "none";
+    }
+
+    // Continue from current wave (keep level, restore HP)
+    function continueFromCurrentWave() {
+      hideDeathOptions();
+
+      // Restore full HP at current level (don't decrease level!)
+      player.hp = player.maxHP;
+
+      // Give some supplies if empty
+      if (player.pots === 0) player.pots = 1;
+      if (player.bombs === 0) player.bombs = 1;
+
+      // Restart current wave (don't decrease wave or level)
+      setMsg(`🔄 Continuing from Wave ${wave} with full HP! Keep fighting!`);
+
+      setTimeout(() => {
+        spawnWave();
+        locked = false;
+        updateUI();
+      }, 1000);
+    }
+
+    // Restart from beginning (reset everything)
+    function restartFromBeginning() {
+      hideDeathOptions();
+      restartGame();
+    }
+
+    // Restart Game Function
+    function restartGame() {
+      // Stop auto mode completely
+      if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+      }
+
+      // Stop enemy attacks
+      stopEnemyAttacks();
+
+      autoMode = false;
+
+      // Reset all player stats to base values first
+      player.level = 1;
+      player.xp = 0;
+      player.xpToNext = 60;
+      player.maxHP = 200;  // Start with lower HP
+      player.hp = 200;
+      player.atk = 60;  // Balanced starting attack
+      player.def = 8;
+      player.pots = 3;
+      player.bombs = 2;
+
+      // Apply difficulty multipliers if selected
+      if (selectedDifficulty) {
+        const mult = difficultyMultipliers[selectedDifficulty];
+        player.maxHP = Math.round(200 * mult.playerHP);  // Start with 200 base HP
+        player.hp = player.maxHP;
+        player.pots = Math.round(3 * mult.supplies);
+        player.bombs = Math.round(2 * mult.supplies);
+      }
+
+      // Reset game state completely
+      wave = 1;
+      enemies = [];
+      selected = 0;
+      locked = false;
+
+      // Hide death options
+      if ($("deathOptions")) {
+        hideDeathOptions();
+      }
+
+      // Reset UI elements safely
+      const tip = $("combatTip");
+      if (tip) {
+        tip.textContent = "Enemies attack automatically every 2 seconds! Use your skills wisely!";
+      }
+
+      setMsg("🔄 Game restarted! Ready for a new adventure!");
+
+      // Only spawn wave if we're in game screen
+      if (document.getElementById('gameScreen').style.display !== 'none') {
+        setTimeout(() => {
+          spawnWave();
+          updateUI();
+        }, 100);
+      }
+    }
+
+    $("btnRestart").addEventListener("click", () => {
+      if (!locked) {
+        restartGame();
+      }
+    });
+
+    // Death option handlers
+    $("btnContinue").addEventListener("click", () => {
+      continueFromCurrentWave();
+    });
+
+    $("btnRestartFromBeginning").addEventListener("click", () => {
+      restartFromBeginning();
+    });
+
+    // ====== Safety Unlock ======
+    function emergencyUnlock() {
+      if (locked && player.hp > 0) {
+        console.log("Emergency unlock triggered");
+        locked = false;
+        updateUI();
+      }
+
+      // Special check for Next Wave button being stuck
+      if (!locked && living().length === 0 && $("btnNext").disabled) {
+        console.log("Fixing stuck Next Wave button");
+        updateUI();
+      }
+    }
+
+    // Check every 2 seconds for stuck states
+    setInterval(emergencyUnlock, 2000);
+
+    // ====== Init ======
+    function boot() {
+      setMsg("Enemies attack automatically every 2 seconds! Choose your combat mode!");
+      updateUI();
+      spawnWave();
+    }
+
+    // Initialize main menu when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      initMainMenu();
+    });
+  </script>
+</body>
+
+</html>
